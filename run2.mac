@@ -1,0 +1,11 @@
+# Macro file for single crystal ni matrix element
+/run/initialize
+
+
+/run/verbose 1
+/run/printProgress 1
+#
+#25PE, 10000 events:  254 s
+#75PE, 10000 events:  240 s
+/Element/det/SiPMmodel 25PE
+/run/beamOn 500000

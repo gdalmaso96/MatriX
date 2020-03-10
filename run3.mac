@@ -1,0 +1,12 @@
+# Macro file for single crystal ni matrix element
+/run/initialize
+
+
+/run/verbose 1
+/run/printProgress 1
+#
+/Element/det/SiPMmodel 25PE
+/Element/det/CrysSize3 2 2 0.25 mm
+/Element/det/CrysMaterial LYSO
+/run/beamOn 1000
+

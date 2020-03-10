@@ -1,0 +1,12 @@
+# Macro file for single crystal ni matrix element
+/run/initialize
+
+
+/run/verbose 1
+/run/printProgress 1
+#
+/run/beamOn 100000
+#
+/Analysis/SetFileName data1.root
+/run/beamOn 900000
+

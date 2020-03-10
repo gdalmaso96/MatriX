@@ -1,0 +1,6 @@
+MatriX simulation
+
+It is possible to change the crystal size via cmd: /Element/det/CrysSize <length> or /Element/det/CrysSize3 <length x> <length y> <length z>
+
+Datas are automatically saved in the build directory in data.root. It will be recreated at each run so you may want to change its name through:  /Analysis/SetFileName *.root
+
