@@ -60,6 +60,8 @@ set(MATRIX_SCRIPTS
     run1.mac
     run2.mac
     run3.mac
+    readgio.cpp
+    signals.C
     init_vis.mac
     vis.mac
     )

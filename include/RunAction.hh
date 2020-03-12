@@ -5,6 +5,7 @@
 #define RunAction_h 1
 
 #include "G4UserRunAction.hh"
+#include "Randomize.hh"
 #include "globals.hh"
 #include "G4ThreeVector.hh"
 
@@ -40,13 +41,32 @@ class RunAction : public G4UserRunAction {
 		void SetEdep(G4double val){fEdep = val;}
 		void SetEdelta(G4double val){fDelta = val;}
 		void SetID(G4int val){fID = val;}
-		void SetChannel(G4int val){fChannel = val;}
+		void SetChannel(std::vector<G4int> val){fChannel = val;}
 		void SetNgammaSec(int ngammasec){fNgammaSec = ngammasec;}
+		
+		void SetCmdOCT(G4bool cmd){fCmdOCT = cmd;}
+		G4bool GetCmdOCT(){return fCmdOCT;}
+
+		void SetCmdDN(G4bool cmd){fCmdDN = cmd;}
+		G4bool GetCmdDN(){return fCmdDN;}
 		
 		void SetNCells(G4int val){fNCells = val;}
 		void SetNPhotoElectrons(G4double val){fNPhotoElectrons = val;}
 		void SetCells(std::vector<G4int> val){fCells = val;}
 		void SetCellTime(std::vector<G4double> val){fCellTime = val;}
+		void SetOCTFlag(std::vector<G4int> val){fOCTflag = val;}
+		void SetDNFlag(std::vector<G4int> val){fDNflag = val;}
+
+		// Gun time
+		inline void SetGunTimeMean(G4double val){fGunTimeMean = val;}
+		inline G4double GetGunTime(){return fGunTime;}
+		inline void AdvanceGunTime(){fGunTime+= G4RandExponential::shoot(fGunTimeMean);}
+
+		// Datk noise time
+		inline void SetDNTimeMean(G4double val){fDNTimeMean = val;}
+		inline G4double GetDNTime(G4int i){return fDNTime.at(i);}
+		inline void AdvanceDNTime(G4int i){fDNTime.at(i) += G4RandExponential::shoot(fDNTimeMean);}
+
 
 	private:
 		TFile* fData;
@@ -56,15 +76,24 @@ class RunAction : public G4UserRunAction {
 		G4double fEdep;
 		G4double fDelta;
 		G4int fID;
-		G4int fChannel;
+		std::vector<G4int> fChannel;
 
 		G4int fNgammaSec;
 
+		G4bool fCmdOCT, fCmdDN;
 		// SiPM scorers
 		G4int fNCells;
 		G4double fNPhotoElectrons;
 		std::vector<G4int> fCells;
 		std::vector<G4double> fCellTime;
+		std::vector<G4int> fOCTflag;
+		std::vector<G4int> fDNflag;
+
+		//SiPM time counters
+		G4double fGunTime;
+		std::vector<G4double> fDNTime;
+		G4double fGunTimeMean, fDNTimeMean;
+
 
 
 		G4String fName;

@@ -14,7 +14,7 @@
 #include "G4SystemOfUnits.hh"
 
 
-RunAction::RunAction() : G4UserRunAction(), fData(nullptr), fTree(nullptr), fName("./data.root"){
+RunAction::RunAction() : G4UserRunAction(), fData(nullptr), fTree(nullptr), fCmdOCT(false), fCmdDN(false), fGunTime(0), fDNTime(0), fGunTimeMean(1/(1.9e9*CLHEP::hertz)), fDNTimeMean(1/(90*CLHEP::kilohertz)), fName("./data.root"){
 	fMessenger = new RunActionMessenger(this);
 }
 
@@ -23,6 +23,13 @@ RunAction::~RunAction(){
 }
 
 void RunAction::BeginOfRunAction(const G4Run*){
+	fGunTime = 0;
+	fDNTime.resize(81);
+	for(int i = 0; i < 81; i++){
+		fDNTime.at(i) = 0;
+		this->AdvanceDNTime(i);
+	}
+
 	fData = TFile::Open(fName, "RECREATE");
 	fTree = new TTree("T","A tree containing simulation values");
 	
@@ -38,6 +45,8 @@ void RunAction::BeginOfRunAction(const G4Run*){
 	fTree->Branch("NPhotoElectrons", &fNPhotoElectrons);
 	fTree->Branch("Cells", &fCells);
 	fTree->Branch("CellTime", &fCellTime);
+	fTree->Branch("OCTflag", &fOCTflag);
+	fTree->Branch("DNflag", &fDNflag);
 }
 
 

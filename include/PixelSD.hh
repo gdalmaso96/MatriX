@@ -31,6 +31,7 @@ class PixelSD : public G4VSensitiveDetector{
 		void SetVoltage(G4double val){fVoltage = val;}
 		void SetDetEffGain();
 		void SetPhotonGain();
+		void SetOCT();
 
 		
 		inline G4String GetFileName(G4int i){return filename[i];}
@@ -46,19 +47,29 @@ class PixelSD : public G4VSensitiveDetector{
 		PixelHitsCollection* fPixelCollection;
 		PixelHitsCollection* fPixelCollectionDraw;
 		G4int fNCells, fNbOfPixels, fChannel;
+		std::vector<G4int> fChannelvec;
 		G4double fNPhotoElectrons;
 		std::vector<G4int> fCells;
 		std::vector<G4double> fCellTime;
+		G4int fOCTflag;
+		std::vector<G4int> fOCTflagvec;
+		std::vector<G4int> fDNflagvec;
 
 		G4double fVoltage;
 		std::vector<G4double> fDetEff;
 		std::vector<G4double> fDetEffx;
 		G4double fDetEffGain;
 		G4double fPhotonGain;
+		G4double fOCT;
 
 		G4double fFillFactor;
 		
-		std::vector<G4int> firstStep;
+		std::vector<std::vector<G4int>> firstStep;
+		std::vector<std::vector<G4double>> activationTime;
+		std::vector<std::vector<G4int>> isParent;
+
+		G4bool fCmdOCT;
+		G4bool fCmdDN;
 		
 		G4String fModel;
 		G4String filename[4];

@@ -21,7 +21,7 @@
 class DetectorConstruction;
 
 
-PixelSD::PixelSD(G4String name, G4String model) : G4VSensitiveDetector(name), fNCells(0), fChannel(0), fNPhotoElectrons(0), fVoltage(56), fDetEffGain(0), fPhotonGain(0){
+PixelSD::PixelSD(G4String name, G4String model) : G4VSensitiveDetector(name), fNCells(0), fChannel(0), fNPhotoElectrons(0), fVoltage(56), fDetEffGain(0), fPhotonGain(0), fOCT(0){
 	fPixelCollection = nullptr;
 	collectionName.insert("pixelCollection");
 	fPixelCollectionDraw = nullptr;
@@ -158,6 +158,51 @@ void PixelSD::SetPhotonGain(){
 	PhotonGainx.clear();
 }
 
+void PixelSD::SetOCT(){
+	std::vector<G4double> OCT;
+	std::vector<G4double> OCTx;
+	G4double x, y;
+	std::ifstream myfile;
+	myfile.open("../tables/" + this->GetFileName(2));
+	while(true){
+		myfile >> x >> y;
+		OCTx.push_back(x); // x is a voltage (over the breakdown threashold)
+		OCT.push_back(y);
+		if(myfile.eof()) break;
+	}
+	myfile.close();
+
+	G4double temp = 0;
+	G4int N =OCTx.size();
+	G4double val = fVoltage - 53;
+	for(int i = 0; i < N; i++){
+		if(i == 0){
+			if((OCTx.at(1) - OCTx.at(0)) / 2 > val - OCTx.at(0)){
+				temp = OCT.at(0);
+				break;
+			}
+		}
+
+		else if(i == N - 1){
+			if((OCTx.at(N - 1) - OCTx.at(N - 2)) / 2 > OCTx.at(N - 1) - val){
+				temp = OCT.at(N - 1);
+				break;
+			}
+		}
+
+		else{
+			if((OCTx.at(i) - OCTx.at(i - 1)) / 2 > OCTx.at(i) -val                    &&  (OCTx.at(i + 1) - OCTx.at(i)) / 2 > val - OCTx.at(i)){
+				temp = OCT.at(i);
+				break;
+			}
+		}
+	}
+
+	fOCT = temp;
+	OCT.clear();
+	OCTx.clear();
+}
+
 void PixelSD::DefineProperties(){
 	G4int i = 0, j = 0; //i is for the pitch, j is for the window material;
 	if (fModel == "75PE") {i = 0; j = 1;}
@@ -192,8 +237,21 @@ void PixelSD::DefineProperties(){
 	SetVoltage(53 + Model::OVoltage[i]);
 	SetDetEffGain();
 	SetPhotonGain();
+	SetOCT();
+	std::cout << "OCT = " << fOCT << std::endl;
+	fOCT = fOCT * Model::OCT_factor[i];
+	std::cout << "OCT times factor = " << fOCT << std::endl;
 	firstStep.clear();
-	for(i = 0; i < this->GetNbOfPixels(); i++) firstStep.push_back(0);
+	activationTime.clear();
+	isParent.clear();
+	for(i = 0; i < 81; i++){
+		std::vector<G4int> a(this->GetNbOfPixels(), 0);
+		firstStep.push_back(a);
+		std::vector<G4double> b(this->GetNbOfPixels(), 0);
+		activationTime.push_back(b);
+		std::vector<G4int> c(this->GetNbOfPixels(), -1);
+		isParent.push_back(c);
+	}
 }
 
 void PixelSD::Initialize(G4HCofThisEvent* hitsCE){
@@ -209,6 +267,8 @@ void PixelSD::Initialize(G4HCofThisEvent* hitsCE){
 	if(hitsCIDDraw < 0) hitsCIDDraw = GetCollectionID(1);
 	hitsCE->AddHitsCollection(hitsCIDDraw, fPixelCollectionDraw);
 
+	fCmdOCT = ((RunAction*) G4RunManager::GetRunManager()->GetUserRunAction())->GetCmdOCT();
+	fCmdDN  = ((RunAction*) G4RunManager::GetRunManager()->GetUserRunAction())->GetCmdDN();
 }
 
 
@@ -222,6 +282,8 @@ G4bool PixelSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
       			theTouchable->GetHistory()->GetTopTransform().TransformPoint(stppos1);
 		G4VPhysicalVolume* physVol = aStep->GetPreStepPoint()->GetTouchable()->GetVolume(0);
 		G4double dimensions = - ((G4Box*) physVol->GetLogicalVolume()->GetSolid())->GetZHalfLength();
+		G4double dimensionsy = - ((G4Box*) physVol->GetLogicalVolume()->GetSolid())->GetYHalfLength();
+		G4double dimensionsx = - ((G4Box*) physVol->GetLogicalVolume()->GetSolid())->GetXHalfLength();
 
 		if(aStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary && 
 		   std::fabs(localpos1.z() + dimensions) < kCarTolerance){
@@ -230,6 +292,7 @@ G4bool PixelSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 			G4double energy = aStep->GetPreStepPoint()->GetKineticEnergy();
 			G4double a = G4UniformRand();
 			G4double p = GetAbsProbability(energy/CLHEP::eV);
+			fOCTflag = 0;
 			if(a < p){ // SiPM Fill Factor
 				G4int replica = aStep->GetPreStepPoint()->GetTouchable()->GetReplicaNumber(0);
 				fChannel = aStep->GetPreStepPoint()->GetTouchable()->GetReplicaNumber(2);
@@ -253,14 +316,105 @@ G4bool PixelSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 					hit->SetDrawit(true);
 					fPixelCollectionDraw->insert(hit);
 				}
-				if(firstStep[replica] == 0) fNCells += 1;
-				fNPhotoElectrons += fPhotonGain;
-				firstStep.at(replica) = 1;
-				fCells.push_back(replica);
-				fCellTime.push_back(aStep->GetPreStepPoint()->GetGlobalTime());
+
+				RunAction* action = (RunAction*) G4RunManager::GetRunManager()->GetUserRunAction();
+				G4double ptime = aStep->GetPreStepPoint()->GetGlobalTime() + action->GetGunTime();
+				if(fCmdDN){
+					while(action->GetDNTime(fChannel) < ptime){
+						G4int DNcell = int(G4UniformRand() * this->GetNbOfPixels());
+						if(firstStep[fChannel][DNcell] == 0 || action->GetDNTime(fChannel) - (activationTime.at(fChannel)).at(DNcell) > 20*CLHEP::nanosecond){
+							(firstStep.at(fChannel)).at(DNcell) = 1;
+							(activationTime.at(fChannel)).at(DNcell) = action->GetDNTime(fChannel);
+							if(ptime - action->GetDNTime(fChannel) < 20*CLHEP::nanosecond) fNCells += 1;
+							fNPhotoElectrons += fPhotonGain;
+							fChannelvec.push_back(fChannel);
+							fCells.push_back(DNcell);
+							fCellTime.push_back(action->GetDNTime(fChannel));
+							if(fCmdOCT && G4UniformRand() < fOCT){
+								G4double cost = G4UniformRand() * 2 - 1;
+								G4double sint = sqrt(1 - cost * cost);
+								G4double phi  = G4UniformRand() * 2 * CLHEP::pi;
+								G4ThreeVector dir = G4ThreeVector(sint * cos(phi), sint * sin(phi), cost);
+								G4DynamicParticle* dynOCT = new G4DynamicParticle(G4OpticalPhoton::OpticalPhotonDefinition(), dir, 2*CLHEP::eV);
+								G4Track* OCT = new G4Track(dynOCT, aStep->GetPreStepPoint()->GetGlobalTime(), aStep->GetPreStepPoint()->GetPosition());
+								OCT->SetParentID(-replica - 1);
+								G4TrackVector* newTrack = aStep->NewSecondaryVector();
+								newTrack->push_back(OCT);
+								fOCTflagvec.push_back(1);
+							}
+							fDNflagvec.push_back(1);
+						}
+						action->AdvanceDNTime(fChannel);
+					}
 				}
+				if(firstStep[fChannel][replica] == 0 || (ptime - activationTime[fChannel][replica] > 20*CLHEP::nanosecond && fCmdDN)){
+					fNCells += 1;
+					fNPhotoElectrons += fPhotonGain;
+					(activationTime.at(fChannel)).at(replica) = ptime;
+					if(fCmdOCT && G4UniformRand() < fOCT){
+						G4double cost = G4UniformRand() * 2 - 1;
+						G4double sint = sqrt(1 - cost * cost);
+						G4double phi  = G4UniformRand() * 2 * CLHEP::pi;
+						G4ThreeVector dir = G4ThreeVector(sint * cos(phi), sint * sin(phi), cost);
+						G4DynamicParticle* dynOCT = new G4DynamicParticle(G4OpticalPhoton::OpticalPhotonDefinition(), dir, 2*CLHEP::eV);
+						G4Track* OCT = new G4Track(dynOCT, aStep->GetPreStepPoint()->GetGlobalTime(), aStep->GetPreStepPoint()->GetPosition());
+						OCT->SetParentID(-replica - 1);
+						G4TrackVector* newTrack = aStep->GetfSecondary();
+						newTrack->push_back(OCT);
+					}
+					if(aStep->GetTrack()->GetParentID() < 0){
+						(isParent.at(fChannel)).at(- (aStep->GetTrack()->GetParentID() + 1)) = replica;
+						fOCTflag = 1;
+					}
+				}
+
+				else if(ptime < activationTime[fChannel][replica] && aStep->GetTrack()->GetParentID() < 10){
+					if((isParent.at(fChannel)).at(replica) != -1){
+						G4double tempTime = (activationTime.at(fChannel)).at(replica);
+						G4int tempID = replica;
+						while((isParent.at(fChannel)).at(tempID) != -1){
+							(activationTime.at(fChannel)).at((isParent.at(fChannel)).at(tempID)) -= (tempTime - ptime);
+							tempID = (isParent.at(fChannel)).at(tempID);
+						}
+					}
+					(activationTime.at(fChannel)).at(replica) = ptime;
+				}
+				(firstStep.at(fChannel)).at(replica) = 1;
+				fChannelvec.push_back(fChannel);
+				fCells.push_back(replica);
+				fCellTime.push_back(ptime);
+				fOCTflagvec.push_back(fOCTflag);
+				fDNflagvec.push_back(0);
+			}
+			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 		}
-		aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+/*
+		else if(aStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary && 
+		        std::fabs(localpos1.z() - dimensions) < kCarTolerance &&
+		        aStep->GetPostStepPoint()->GetMomentumDirection().getZ() < 0){
+			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+		}
+		else if(aStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary && 
+		        std::fabs(localpos1.y() + dimensionsy) < kCarTolerance &&
+		        aStep->GetPostStepPoint()->GetMomentumDirection().getY() > 0){
+			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+		}
+		else if(aStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary && 
+		        std::fabs(localpos1.y() - dimensionsy) < kCarTolerance &&
+		        aStep->GetPostStepPoint()->GetMomentumDirection().getY() < 0){
+			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+		}		
+		else if(aStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary && 
+		        std::fabs(localpos1.x() + dimensionsx) < kCarTolerance &&
+		        aStep->GetPostStepPoint()->GetMomentumDirection().getX() > 0){
+			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+		}
+		else if(aStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary && 
+		        std::fabs(localpos1.x() - dimensionsx) < kCarTolerance &&
+		        aStep->GetPostStepPoint()->GetMomentumDirection().getX() < 0){
+			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+		}
+*/
 	}
 	
 	return false;
@@ -268,18 +422,34 @@ G4bool PixelSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 
 void PixelSD::EndOfEvent(G4HCofThisEvent*){
 	PixelHit* Hit = new PixelHit();
-	Hit->SetChannel(fChannel);
+	Hit->SetChannel(fChannelvec);
 	Hit->SetNCells(fNCells);
 	Hit->SetNPhotoElectrons(fNPhotoElectrons);
 	Hit->SetCells(fCells);
 	Hit->SetCellTime(fCellTime);
+	Hit->SetOCTFlag(fOCTflagvec);
+	Hit->SetDNFlag(fDNflagvec);
 	fPixelCollection->insert(Hit);
 	fNCells = 0;
 	fNPhotoElectrons = 0;
+	fChannelvec.clear();
 	fCells.clear();
 	fCellTime.clear();
+	fOCTflagvec.clear();
+	fDNflagvec.clear();
 
-	std::fill(firstStep.begin(), firstStep.end(),0);
+	if(!fCmdDN){
+		firstStep.clear();
+		for(int i = 0; i < 81; i++){
+			std::vector<G4int> a(this->GetNbOfPixels(), 0);
+			firstStep.push_back(a);
+		}
+	}
+	isParent.clear();
+	for(int i = 0; i < 81; i++){
+		std::vector<G4int> c(this->GetNbOfPixels(), -1);
+		isParent.push_back(c);
+	}
 }
 
 void PixelSD::clear(){}

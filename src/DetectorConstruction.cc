@@ -3,6 +3,7 @@
 
 #include "DetectorConstruction.hh"
 #include "DetectorMessenger.hh"
+#include "RunAction.hh"
 #include "SiPMModel.hh"
 
 
@@ -294,6 +295,10 @@ void DetectorConstruction::SetSiPMmodel(G4String name){
 	
 	fSiPM_sizeZ = Model::SiPM_size_Z[j];
 	fSiPM_windowZ = Model::window_size_Z[j];
+
+	if(G4RunManager::GetRunManager()->GetUserRunAction()){
+		((RunAction*) G4RunManager::GetRunManager()->GetUserRunAction())->SetDNTimeMean(1 / Model::dark_noise_rate[i]);
+	}
 	G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 

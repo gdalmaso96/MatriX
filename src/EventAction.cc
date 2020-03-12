@@ -76,16 +76,13 @@ void EventAction::EndOfEventAction(const G4Event* event){
 			fRunAction->SetNPhotoElectrons(pixelHit->GetNPhotoElectrons());
 			fRunAction->SetCells(pixelHit->GetCells());
 			fRunAction->SetCellTime(pixelHit->GetCellTime());
+			fRunAction->SetOCTFlag(pixelHit->GetOCTFlag());
+			fRunAction->SetDNFlag(pixelHit->GetDNFlag());
 			(fRunAction->GetTreePtr())->Fill();
-		}
-		if(pixelHit->GetNCells() > 0){
-			std::ofstream myfile;
-			myfile.open("out.txt", std::ios::app);
-			myfile << pixelHit->GetChannel() << std::endl;
-			myfile.close();
 		}
 		scintHit->Clear();
 		pixelHit->Clear();
 	}
+	fRunAction->AdvanceGunTime();
 	fEvID = -1;
 }

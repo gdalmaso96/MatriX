@@ -239,7 +239,7 @@ TH2Poly* getMatrixLayout(const char* name) {
 }
 
 int readMatrix(string filename) {
-    const float crystalSize = 1.65; // mm
+    const float crystalSize = 2; // mm
 
     float time = 0;
     float beamRate = 0;
@@ -261,7 +261,7 @@ int readMatrix(string filename) {
 
     TH2Poly *prof2 = getMatrixLayout((name + "poly").c_str());
 
-    Int_t value = 0;
+    Double_t value = 0;
     // Read the file data
     Int_t iBin = 0;
     Float_t x = -25.05;
@@ -295,7 +295,7 @@ int readMatrix(string filename) {
     //fit->SetParLimits(3, -25, 25);
     //fit->SetParLimits(4, 0, 20);
     //fit->SetParLimits(6, -1, 1);
-    profile->Fit(fit, "0");
+    profile->Fit(fit, "P0");
 
 
     TF2* theFit = (TF2*)profile->FindObject("fit");
@@ -310,7 +310,7 @@ int readMatrix(string filename) {
     // Some calculations:
 
     Float_t Ntot = 2 * TMath::Pi() * fit->Eval(theFit->GetParameter(1), theFit->GetParameter(3)) * theFit->GetParameter(2) * theFit->GetParameter(4) * TMath::Sqrt(1 - theFit->GetParameter(5) * theFit->GetParameter(5)) / (crystalSize * crystalSize);
-    Float_t muonRate = Ntot * 0.22 / beamRate * 1e6;
+    Float_t muonRate = Ntot * 0.22 / beamRate / time;
 
     TLegend* legend = new TLegend(0.5,0.7,0.9,0.9);
     legend->AddEntry(fit, TString::Format("Fit: "), "");
@@ -326,6 +326,7 @@ int readMatrix(string filename) {
     cout << "stdv y: " << theFit->GetParameter(4) << " +- " << fit->GetParError(4) << endl;
     cout << "xy cor: " << theFit->GetParameter(5) << " +- " << fit->GetParError(5) << endl;
     cout << "Ntot: " << Ntot << endl;
+    cout << "Beam rate: " << beamRate << endl;
     cout << "Rate: " << muonRate << " mu / s" << endl;
     cout << "Time: " << time << endl;
 
