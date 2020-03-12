@@ -10,10 +10,9 @@
 #include "G4Material.hh"
 #include "G4NistManager.hh"
 
-#include "G4RunManager.hh"
-
 #include "G4Box.hh"
 #include "G4Tubs.hh"
+#include "G4SubtractionSolid.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4PVReplica.hh"
@@ -42,7 +41,7 @@
 #include "G4GenericMessenger.hh"
 
 /// Constructor
-DetectorConstruction::DetectorConstruction() : G4VUserDetectorConstruction(), fmodel("75PE"), fCrysVolume(nullptr), fSiPMVolume(nullptr), fElementVolume(nullptr), fSolidCrys(nullptr), fSolidWorld(nullptr), fSolidElement(nullptr), fCheckOverlaps(true), fNbOfPixelsX(0), fNbOfPixelsY(0), fLogicPixel(nullptr), fLogicCrys(nullptr), fCrysSizeX(2*mm), fCrysSizeY(2*mm), fCrysSizeZ(2*mm), fSiPM_sizeXY(1.3*mm), fSiPM_sizeZ(0*mm){
+DetectorConstruction::DetectorConstruction() : G4VUserDetectorConstruction(), fmodel("75PE"), fCrysVolume(nullptr), fSiPMVolume(nullptr), fElementVolume(nullptr), fSolidCrys(nullptr), fSolidWorld(nullptr), fSolidElement(nullptr), fCheckOverlaps(true), fMaskBool(false), fNbOfPixelsX(0), fNbOfPixelsY(0), fLogicPixel(nullptr), fLogicCrys(nullptr), fCrysSizeX(2*mm), fCrysSizeY(2*mm), fCrysSizeZ(2*mm), fSiPM_sizeXY(1.3*mm), fSiPM_sizeZ(0*mm){
 	fDetectorMessenger = new DetectorMessenger(this);
 	SetSiPMmodel("75PE");
 	DefineMaterials();
@@ -365,6 +364,10 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
     
     G4LogicalVolume* logicElement = new G4LogicalVolume(fSolidElement, fVacuum, "Element");
 
+    // Mask
+    G4Tubs* SolidMaskC = new G4Tubs("MaskC", 0, 6*cm, 0.5 * (fCrysSizeZ + SiPM_sizeZ + fSiPM_windowZ), 0, 2*CLHEP::pi);
+    G4SubtractionSolid* SolidMask;
+    
     // Place SiPM in Element
     G4ThreeVector SiPM_pos = G4ThreeVector(0, 0, -0.5*fCrysSizeZ); 
     fSiPMVolume = new G4PVPlacement(0, SiPM_pos, logicSiPM, "SiPM", logicElement, false, 0, fCheckOverlaps);
@@ -379,6 +382,12 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
                                                   6*mm * (- 4 + i/9),
                                                   - (fSolidWorld->GetZHalfLength() - fSolidElement->GetZHalfLength()) + 4*mm);
         new G4PVPlacement(0, element_pos, logicElement, "Element", logicWorld, false, i, fCheckOverlaps);
+	if(i == 0) SolidMask = new G4SubtractionSolid("Mask", SolidMaskC, fSolidElement, 0, G4ThreeVector(0, 0, - (fSolidWorld->GetZHalfLength() - fSolidElement->GetZHalfLength()) + 4*mm));
+	else SolidMask = new G4SubtractionSolid("Mask", SolidMask, fSolidElement, 0, G4ThreeVector(0, 0, - (fSolidWorld->GetZHalfLength() - fSolidElement->GetZHalfLength()) + 4*mm));
+    }
+    G4LogicalVolume* logicMask = new G4LogicalVolume(SolidMask, fVacuum, "Mask");
+    if(fMaskBool){
+	    G4PVPlacement* physMask = new G4PVPlacement(0, G4ThreeVector(0,0, - 0.5 * (world_sizeZ - 8*mm -(fCrysSizeZ + SiPM_sizeZ + fSiPM_windowZ))), logicMask, "Mask", logicWorld, false, 0, fCheckOverlaps);
     }
 
     logicBoard->SetVisAttributes(G4Colour(0., 1, 0., 0.8));
@@ -388,6 +397,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
     logicPixel->SetVisAttributes(G4Colour(0.,0.,1., 0.8));
     logicWorld->SetVisAttributes(G4Colour(1, 1, 1, 0.1));
     logicCrys->SetVisAttributes(G4Colour(1, 1, 1, 0.3));
+    logicMask->SetVisAttributes(G4Colour(0, 0, 0, 1));
     
     return physWorld;
 }

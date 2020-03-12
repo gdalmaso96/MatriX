@@ -6,12 +6,15 @@ Datas are saved into the build folder in the "data.root" file. You can change fi
 	/Analysis/SetFileName <new_name.root> (must include ".root")
 
 It is possible to change the scintillation crystals material and size:
-	/Element/det/CrysSize <newsize> <unit>
-	/Element/det/CrysSize3 <newsizex> <newsizey> <newsizez> <unit>
-	/Element/det/CrysMaterial <material_name> ("BC400" or "LYSO")
+	/MatriX/det/CrysSize <newsize> <unit>
+	/MatriX/det/CrysSize3 <newsizex> <newsizey> <newsizez> <unit>
+	/MatriX/det/CrysMaterial <material_name> ("BC400" or "LYSO")
 
 It is possible to change the SiPM model:
-	/Element/det/SiPMmodel <model_name> ("25PE", "50PE", "75PE", "25CS", "50CS", "75CS")
+	/MatriX/det/SiPMmodel <model_name> ("25PE", "50PE", "75PE", "25CS", "50CS", "75CS")
+
+It is possible to put a mask on MatriX to isolate the elements:
+	/MatriX/det/Mask <bool> (default is "false")
 
 It is possible to activate dark counts or optical cross talk:
 	/Element/det/OCT <bool> (default is false)

@@ -47,6 +47,7 @@ void RunAction::BeginOfRunAction(const G4Run*){
 	fTree->Branch("CellTime", &fCellTime);
 	fTree->Branch("OCTflag", &fOCTflag);
 	fTree->Branch("DNflag", &fDNflag);
+	fTree->Branch("GunTime", &fGunTime);
 }
 
 

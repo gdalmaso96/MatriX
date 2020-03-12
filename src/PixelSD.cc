@@ -388,7 +388,7 @@ G4bool PixelSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 			}
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 		}
-/*
+
 		else if(aStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary && 
 		        std::fabs(localpos1.z() - dimensions) < kCarTolerance &&
 		        aStep->GetPostStepPoint()->GetMomentumDirection().getZ() < 0){
@@ -414,7 +414,7 @@ G4bool PixelSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 		        aStep->GetPostStepPoint()->GetMomentumDirection().getX() < 0){
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 		}
-*/
+
 	}
 	
 	return false;

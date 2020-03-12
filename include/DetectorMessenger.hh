@@ -13,6 +13,7 @@ class G4UIcmdWithAString;
 class G4UIcmdWithADoubleAndUnit;
 class G4UIcmdWith3VectorAndUnit;
 class G4UIcmdWithADouble;
+class G4UIcmdWithABool;
 
 /// it implements command:
 /// - /Element/det/SetCrysSize value unit
@@ -28,13 +29,14 @@ class DetectorMessenger : public G4UImessenger{
 	private:
 		DetectorConstruction* fDetectorConstruction;
 		
-		G4UIdirectory* fElementDirectory;
+		G4UIdirectory* fMatrixDirectory;
 		G4UIdirectory* fDetDirectory;
 		
 		G4UIcmdWithADoubleAndUnit* fCrysSizeCmd;
 		G4UIcmdWith3VectorAndUnit* fCrysSizeCmd3;
 		G4UIcmdWithAString* fCrysMaterialCmd;
 		G4UIcmdWithAString* fSiPMmodelCmd;
+		G4UIcmdWithABool* fMaskCmd;
 };
 
 #endif

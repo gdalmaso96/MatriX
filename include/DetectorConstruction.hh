@@ -9,6 +9,7 @@
 #include "ScintSD.hh"
 #include "PixelSD.hh"
 #include "G4Cache.hh"
+#include "G4RunManager.hh"
 
 class G4VPhysicalVolume;
 class G4VLogicallVolume;
@@ -36,6 +37,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction{
     	void SetCrystalSize(G4ThreeVector);
 	void SetCrystalMaterial(G4String);
 	void SetSiPMmodel(G4String);
+	void SetMask(bool val){fMaskBool = val; G4RunManager::GetRunManager()->ReinitializeGeometry();}
 
 	G4int GetNbOfPixels(){return fNbOfPixelsX * fNbOfPixelsY;}
 
@@ -58,6 +60,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction{
 	G4Box* fSolidWorld;
 	G4Box* fSolidElement;
 	G4bool fCheckOverlaps;
+	G4bool fMaskBool;
 	G4int fNbOfPixelsX, fNbOfPixelsY;
 
 	G4LogicalVolume* fLogicPixel;
@@ -71,6 +74,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction{
 	G4Material* fMaterial;
 	G4Material* fMaterialWindow;
 	G4Material* fAir;
+	G4Material* fAbsorber;
 	G4Material* fVacuum;
 	G4Element* fN;
 	G4Element* fO;
