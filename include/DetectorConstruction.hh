@@ -75,6 +75,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction{
 	G4Material* fMaterialWindow;
 	G4Material* fAir;
 	G4Material* fAbsorber;
+	G4Material* fBoard;
 	G4Material* fVacuum;
 	G4Element* fN;
 	G4Element* fO;

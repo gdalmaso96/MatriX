@@ -41,8 +41,6 @@ void RunAction::BeginOfRunAction(const G4Run*){
 	fTree->Branch("NgammaSec", &fNgammaSec);
 
 	fTree->Branch("Channel", &fChannel);
-	fTree->Branch("NCells", &fNCells);
-	fTree->Branch("NPhotoElectrons", &fNPhotoElectrons);
 	fTree->Branch("Cells", &fCells);
 	fTree->Branch("CellTime", &fCellTime);
 	fTree->Branch("OCTflag", &fOCTflag);

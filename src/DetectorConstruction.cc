@@ -82,8 +82,8 @@ void DetectorConstruction::DefineMaterials(){
 	/// Materials
 	// BC400
 	fBC400 = new G4Material("BC400", density = 1.023*g/cm3, 2);
-	fBC400->AddElement(fC, 1 / (1 + R) * 100 * perCent);
-	fBC400->AddElement(fH, R / (1 + R) * 100 * perCent);
+	fBC400->AddElement(fC, 1000);
+	fBC400->AddElement(fH, 1103);
 
 	// LYSO
 	fLYSO = new G4Material("BC400", density = 7.1*g/cm3, 5);
@@ -101,6 +101,10 @@ void DetectorConstruction::DefineMaterials(){
 	// Silicium
 	fSi = nist->FindOrBuildMaterial("G4_Si");
 	
+	// Board
+	fBoard = new G4Material("MatBoard", density = 2.3290*g/cm3, 1);
+	fBoard->AddElement(fSie, 1);
+	
 	// Silicon resin
 	fSiResin = new G4Material("SiResin",z=1.,a=1.01*g/mole, 
 		     		 density = universe_mean_density, kStateGas,
@@ -113,6 +117,11 @@ void DetectorConstruction::DefineMaterials(){
 
 	// Vacuuum
 	fVacuum = new G4Material("Vacuum",z=1.,a=1.01*g/mole, 
+		     		 density = universe_mean_density, kStateGas,
+				 0.1 * kelvin, 1.e-19 * pascal);
+	
+	// Absorber
+	fAbsorber = new G4Material("Absorber",z=1.,a=1.01*g/mole, 
 		     		 density = universe_mean_density, kStateGas,
 				 0.1 * kelvin, 1.e-19 * pascal);
 	
@@ -134,11 +143,11 @@ void DetectorConstruction::DefineMaterials(){
 	assert(energy.size() == scint.size());
 	const G4int bc400 = int(energy.size());
 
-	G4double* BC400_Energy = new G4double[bc400];
-	G4double* BC400_SCINT = new G4double[bc400];
+	G4double BC400_Energy[bc400];
+	G4double BC400_SCINT[bc400];
 
-	G4double* BC400_RIND = new G4double[bc400];
-	G4double* BC400_ABSL = new G4double[bc400];
+	G4double BC400_RIND[bc400];
+	G4double BC400_ABSL[bc400];
 	
 	for(int i = 0; i < bc400; i++){
 		BC400_Energy[i] = energy.at(i)*eV;
@@ -190,11 +199,11 @@ void DetectorConstruction::DefineMaterials(){
 	assert(energy.size() == scint.size());
 	const G4int lyso = int(energy.size());
 
-	G4double* LYSO_Energy = new G4double[lyso];
-	G4double* LYSO_SCINT  = new G4double[lyso];
+	G4double LYSO_Energy[lyso];
+	G4double LYSO_SCINT[lyso];
 
-	G4double* LYSO_RIND = new G4double[lyso];
-	G4double* LYSO_ABSL = new G4double[lyso];
+	G4double LYSO_RIND[lyso];
+	G4double LYSO_ABSL[lyso];
 	
 	for(int i = 0; i < lyso; i++){
 		LYSO_Energy[i] = energy.at(i)*eV;
@@ -235,7 +244,7 @@ void DetectorConstruction::DefineMaterials(){
 	
 	G4double vRIND = 1.;
 	G4double vacuum_RIND[] = {vRIND, vRIND};
-	assert(sizeof(vacuum_RIN) == sizeof(vacuum_Energy));
+	assert(sizeof(vacuum_RIND) == sizeof(vacuum_Energy));
 	
 	G4MaterialPropertiesTable* vacuum_mt = new G4MaterialPropertiesTable();
 	vacuum_mt->AddProperty("RINDEX", vacuum_Energy, vacuum_RIND, vacnum);
@@ -327,7 +336,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
 
     // Board = Cylinder
     G4Tubs* SolidBoard = new G4Tubs("Board", 0, 6*cm, 2*mm, 0, 2*CLHEP::pi);
-    G4LogicalVolume* logicBoard = new G4LogicalVolume(SolidBoard, fSi, "Board");
+    G4LogicalVolume* logicBoard = new G4LogicalVolume(SolidBoard, fBoard, "Board");
     G4PVPlacement* physBoard = new G4PVPlacement(0, G4ThreeVector(0,0, - 0.5 * (world_sizeZ - 4*mm)), logicBoard, "Board", logicWorld, false, 0, fCheckOverlaps);
 
 
@@ -345,17 +354,14 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
     G4LogicalVolume* logicSiPMwindow = new G4LogicalVolume(solidSiPMwindow, fMaterialWindow, "SiPMwindow");
     
     // SiPM pixel
-    G4Box* solidPixel = new G4Box("Pixel", 0.5*SiPM_sizeXY / fNbOfPixelsX, 0.5*SiPM_sizeXY / fNbOfPixelsY, 0.5*SiPM_sizeZ);
+    G4Box* solidPixel = new G4Box("Pixel", 0.5*SiPM_sizeXY, 0.5*SiPM_sizeXY, 0.5*SiPM_sizeZ);
     G4LogicalVolume* logicPixel = new G4LogicalVolume(solidPixel, fSi, "PixelLV");
     G4int i = 0, j = 0;
     fLogicPixel = logicPixel;
 
-    for(G4int ipixel = 0; ipixel < nofPixels; ++ipixel){
-        i = ipixel%int(fNbOfPixelsX);
-        j = ipixel/int(fNbOfPixelsX);
-        G4ThreeVector pixel_pos = G4ThreeVector(SiPM_sizeXY /fNbOfPixelsX * (-0.5 * fNbOfPixelsX + i + 0.5), SiPM_sizeXY /fNbOfPixelsY * (-0.5 * fNbOfPixelsY + j + 0.5), -0.5 * (fSiPM_windowZ));
-        new G4PVPlacement(0, pixel_pos, logicPixel, "Pixel", logicSiPM, false, ipixel, fCheckOverlaps);
-    }
+    G4ThreeVector pixel_pos = G4ThreeVector(0, 0, -0.5 * (fSiPM_windowZ));
+    new G4PVPlacement(0, pixel_pos, logicPixel, "Pixel", logicSiPM, false, 0, fCheckOverlaps);
+    
 
     new G4PVPlacement(0, G4ThreeVector(0, 0, 0.5 * SiPM_sizeZ), logicSiPMwindow, "Window", logicSiPM, false, 0, fCheckOverlaps);
 
@@ -385,7 +391,8 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
 	if(i == 0) SolidMask = new G4SubtractionSolid("Mask", SolidMaskC, fSolidElement, 0, G4ThreeVector(0, 0, - (fSolidWorld->GetZHalfLength() - fSolidElement->GetZHalfLength()) + 4*mm));
 	else SolidMask = new G4SubtractionSolid("Mask", SolidMask, fSolidElement, 0, G4ThreeVector(0, 0, - (fSolidWorld->GetZHalfLength() - fSolidElement->GetZHalfLength()) + 4*mm));
     }
-    G4LogicalVolume* logicMask = new G4LogicalVolume(SolidMask, fVacuum, "Mask");
+
+    G4LogicalVolume* logicMask = new G4LogicalVolume(SolidMask, fAbsorber, "Mask");
     if(fMaskBool){
 	    G4PVPlacement* physMask = new G4PVPlacement(0, G4ThreeVector(0,0, - 0.5 * (world_sizeZ - 8*mm -(fCrysSizeZ + SiPM_sizeZ + fSiPM_windowZ))), logicMask, "Mask", logicWorld, false, 0, fCheckOverlaps);
     }
@@ -398,7 +405,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
     logicWorld->SetVisAttributes(G4Colour(1, 1, 1, 0.1));
     logicCrys->SetVisAttributes(G4Colour(1, 1, 1, 0.3));
     logicMask->SetVisAttributes(G4Colour(0, 0, 0, 1));
-    
+
     return physWorld;
 }
 
@@ -418,11 +425,13 @@ void DetectorConstruction::ConstructSDandField(){
 		pixel_SD->DefineProperties();
 		fPixel_SD.Put(pixel_SD);
 	}
+
 	else{
 		PixelSD* pixel_SD = fPixel_SD.Get();
 		pixel_SD->SetModel(fmodel);
 		pixel_SD->DefineProperties();
 	}
+
 	G4SDManager::GetSDMpointer()->AddNewDetector(fPixel_SD.Get());
 	SetSensitiveDetector(fLogicPixel, fPixel_SD.Get());
 }

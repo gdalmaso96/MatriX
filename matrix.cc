@@ -29,12 +29,8 @@ int main(int argc, char** argv){
         ui = new G4UIExecutive(argc, argv);
     }
 
-	// Construct the default run manager
-#ifdef G4MULTITHREADED
-	G4MTRunManager* runManager = new G4MTRunManager;
-#else
-	G4RunManager*   runManager = new G4RunManager;
-#endif
+    G4RunManager*   runManager = new G4RunManager;
+
 
     // Set mandatory initialization classes
     runManager->SetUserInitialization(new DetectorConstruction);

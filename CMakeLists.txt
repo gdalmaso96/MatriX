@@ -56,10 +56,6 @@ target_link_libraries(matrix ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 # relies on these scripts being the current working sirectory.
 #
 set(MATRIX_SCRIPTS
-    run.mac
-    run1.mac
-    run2.mac
-    run3.mac
     readgio.cpp
     signals.C
     init_vis.mac

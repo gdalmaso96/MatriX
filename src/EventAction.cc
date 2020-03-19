@@ -16,7 +16,11 @@
 #include "G4UnitsTable.hh"
 #include "G4THitsMap.hh"
 #include "G4SystemOfUnits.hh"
+#include <sys/resource.h>
 
+ 
+
+struct rusage usage;
 EventAction::EventAction(RunAction* runAction) : G4UserEventAction(), fRunAction(runAction), fCollIDScint(-1), fCollIDSiPM(-1), fCollIDSiPMDraw(-1), fEvID(-1){}
 
 EventAction::~EventAction(){}
@@ -41,19 +45,6 @@ void EventAction::EndOfEventAction(const G4Event* event){
 	}
 	
 	PixelHitsCollection* PixelHitCollection = (PixelHitsCollection*) (HCE->GetHC(fCollIDSiPM));
-
-	if(fCollIDSiPMDraw < 0){
-		G4SDManager* SDMan = G4SDManager::GetSDMpointer();
-		fCollIDSiPMDraw = SDMan->GetCollectionID("pixelCollectionDraw");
-	}
-	
-	PixelHitsCollection* PixelHitCollectionDraw = (PixelHitsCollection*) (HCE->GetHC(fCollIDSiPMDraw));
-	if(PixelHitCollectionDraw){
-		for(int i = 0; i < PixelHitCollectionDraw->entries(); i++){
-			(*PixelHitCollectionDraw)[i]->Draw();
-		}
-	}
-	
 	
 	ScintHit* scintHit;
 	G4int N = ScintHitCollection->entries();
@@ -72,8 +63,6 @@ void EventAction::EndOfEventAction(const G4Event* event){
 			fRunAction->SetNgammaSec(scintHit->GetNgammaSec());
 			
 			fRunAction->SetChannel(pixelHit->GetChannel());
-			fRunAction->SetNCells(pixelHit->GetNCells());
-			fRunAction->SetNPhotoElectrons(pixelHit->GetNPhotoElectrons());
 			fRunAction->SetCells(pixelHit->GetCells());
 			fRunAction->SetCellTime(pixelHit->GetCellTime());
 			fRunAction->SetOCTFlag(pixelHit->GetOCTFlag());
@@ -83,6 +72,13 @@ void EventAction::EndOfEventAction(const G4Event* event){
 		scintHit->Clear();
 		pixelHit->Clear();
 	}
+/*
+      if (0 == getrusage(RUSAGE_SELF, &usage)) {
+
+         std::cout << "Memory Usage (MB): " << usage.ru_maxrss / 1024. << std::endl;
+
+      }
+*/
 	fRunAction->AdvanceGunTime();
 	fEvID = -1;
 }

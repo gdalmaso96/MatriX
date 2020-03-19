@@ -1,3 +1,13 @@
+TString format(TString pre, Double_t par, Double_t err) {
+
+	Int_t nDigits = max(int(-TMath::Log10(err/fabs(par)) + 1.176091), 0);
+	Int_t nFirst = 0;
+	if(TMath::Log10(fabs(par)) > 0) nFirst = int(TMath::Log10(fabs(par)));
+	else nFirst = int(TMath::Log10(fabs(par))) - 1;
+	if(nFirst >= 0 && nFirst <=2) return pre + TString::Format("%0.*f(%i) ", nDigits, par,int(err * TMath::Power(10, nDigits) + 0.5));
+	else if(nFirst >= -2 && nFirst < 0) return pre + TString::Format("%0.*f(%i) ", nDigits - nFirst, par,int(err * TMath::Power(10, nDigits - nFirst) + 0.5));
+	else return pre + TString::Format("%0.*f(%i) ", nDigits, par/pow(10, nFirst),int(err * TMath::Power(10, nDigits - nFirst) + 0.5)) + TString::Format(" e%i", nFirst);
+}
 
 int iparX[3] = { 0,
                  1,
@@ -176,8 +186,8 @@ int readSciFi(string filename) {
     xText->Draw();
    
     //fx->Draw("same");
-    cx->SaveAs((name + "gioX.C").c_str());
-    cx->SaveAs((name + "gioX.pdf").c_str());
+    cx->SaveAs(("./fig/" + name + "gioX.C").c_str());
+    cx->SaveAs(("./fig/" + name + "gioX.pdf").c_str());
 
     
     
@@ -200,8 +210,8 @@ int readSciFi(string filename) {
     gYProfile->Draw("ap");
     yText->Draw();
    //fy->Draw("same");
-    cy->SaveAs((name + "gioY.C").c_str());
-    cy->SaveAs((name + "gioY.pdf").c_str());
+    cy->SaveAs(("./fig/" + name + "gioY.C").c_str());
+    cy->SaveAs(("./fig/" + name + "gioY.pdf").c_str());
 
 
     TLegend* legend = new TLegend(0.5,0.7,0.9,0.9);
@@ -218,8 +228,8 @@ int readSciFi(string filename) {
     fxy->GetZaxis()->SetTickLength(0.01);
     fxy->SetFitResult(result);
     fxy->Draw("surf2");
-    cxy->SaveAs((name + "gioXY.C").c_str());
-    cxy->SaveAs((name + "gioXY.pdf").c_str());
+    cxy->SaveAs(("./fig/" + name + "gioXY.C").c_str());
+    cxy->SaveAs(("./fig/" + name + "gioXY.pdf").c_str());
     legend->Draw();
 
 
@@ -309,14 +319,19 @@ int readMatrix(string filename) {
 
     // Some calculations:
 
-    Float_t Ntot = 2 * TMath::Pi() * fit->Eval(theFit->GetParameter(1), theFit->GetParameter(3)) * theFit->GetParameter(2) * theFit->GetParameter(4) * TMath::Sqrt(1 - theFit->GetParameter(5) * theFit->GetParameter(5)) / (crystalSize * crystalSize);
+//    Float_t Ntot = 2 * TMath::Pi() * fit->Eval(theFit->GetParameter(1), theFit->GetParameter(3)) * theFit->GetParameter(2) * theFit->GetParameter(4) * TMath::Sqrt(1 - theFit->GetParameter(5) * theFit->GetParameter(5)) / (crystalSize * crystalSize);
+    Float_t Ntot = theFit->GetParameter(0) / (crystalSize * crystalSize);
     Float_t muonRate = Ntot * 0.22 / beamRate / time;
+    Float_t dMuonRate = theFit->GetParError(0) * 0.22 / beamRate / time;
+
+	std::cout << muonRate << " " << dMuonRate << std::endl;
 
     TLegend* legend = new TLegend(0.5,0.7,0.9,0.9);
     legend->AddEntry(fit, TString::Format("Fit: "), "");
-    legend->AddEntry(fit, TString::Format("     #mu = (%.2lf,%.2lf)", theFit->GetParameter(1), theFit->GetParameter(3)), "");
-    legend->AddEntry(fit, TString::Format("     #sigma = (%.2lf,%.2lf)", theFit->GetParameter(2), theFit->GetParameter(4)), "");
-    legend->AddEntry(fit, TString::Format("     Rate = %.2e mu/s",muonRate), "");
+    legend->AddEntry(fit, format("     #mu = (", theFit->GetParameter(1), theFit->GetParError(1)) + format(", ", theFit->GetParameter(3), theFit->GetParError(3)) + ") mm", "");
+    legend->AddEntry(fit, format("     #sigma = (", theFit->GetParameter(2), theFit->GetParError(2)) + format(", ", theFit->GetParameter(4), theFit->GetParError(4)) + ") mm", "");
+    legend->AddEntry(fit, format("     Rate = ", muonRate, dMuonRate) +" mu/s", "");
+    legend->AddEntry(fit, TString::Format("     Exposition time = %.1e", time) +" s", "");
     TCanvas* c2 = new TCanvas((name + "2d" ).c_str(), name.c_str());
     fit->SetTitle((name + "Beam Profile;x [mm];y [mm];Rate [Hz]" ).c_str());
     fit->Draw("surf2");
@@ -330,10 +345,10 @@ int readMatrix(string filename) {
     cout << "Rate: " << muonRate << " mu / s" << endl;
     cout << "Time: " << time << endl;
 
-    c1->SaveAs((name + "profile.C").c_str());
-    c1->SaveAs((name + "profile.pdf").c_str());
-    c2->SaveAs((name + "2dprofile.C").c_str());
-    c2->SaveAs((name + "2dprofile.pdf").c_str());
+    c1->SaveAs(("./fig/" + name + "profile.C").c_str());
+    c1->SaveAs(("./fig/" + name + "profile.pdf").c_str());
+    c2->SaveAs(("./fig/" + name + "2dprofile.C").c_str());
+    c2->SaveAs(("./fig/" + name + "2dprofile.pdf").c_str());
 
     ROOT::Math::MinimizerOptions::SetDefaultMinimizer(oldMeth.c_str(), oldAlgo.c_str());
     return 0;

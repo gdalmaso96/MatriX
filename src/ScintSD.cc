@@ -59,7 +59,7 @@ G4bool ScintSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 		
 		G4double ein = 0, eout = 0;
 		G4StepPoint* preStep = aStep->GetPreStepPoint();
-		G4StepPoint* postStep = aStep->GetPreStepPoint();
+		G4StepPoint* postStep = aStep->GetPostStepPoint();
 		
 		// Counting and classifying photons
 		const std::vector<const G4Track*>* secondaries = aStep->GetSecondaryInCurrentStep();

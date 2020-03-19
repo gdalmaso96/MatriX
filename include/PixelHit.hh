@@ -29,52 +29,26 @@ class PixelHit : public G4VHit{
 		virtual void Draw();
 		virtual void Print();
 
-		inline void SetNCells(G4int val){fNCells = val;}
 		inline void SetChannel(std::vector<G4int> val){fChannel = val;}
-		inline void SetNPhotoElectrons(G4double val){fNPhotoElectrons = val;}
 		inline void SetCells(std::vector<G4int> val){fCells = val;}
 		inline void SetCellTime(std::vector<G4double> val){fCellTime = val;}
 		inline void SetOCTFlag(std::vector<G4int> val){fOCTflag = val;}
 		inline void SetDNFlag(std::vector<G4int> val){fDNflag = val;}
 
-		inline G4int GetNCells(){return fNCells;}
 		inline std::vector<G4int> GetChannel(){return fChannel;}
-		inline G4double GetNPhotoElectrons(){return fNPhotoElectrons;}
 		inline std::vector<G4int> GetCells(){return fCells;}
 		inline std::vector<G4double> GetCellTime(){return fCellTime;}
 		inline std::vector<G4int> GetOCTFlag(){return fOCTflag;}
 		inline std::vector<G4int> GetDNFlag(){return fDNflag;}
 
-		inline void Clear(){fNCells = 0; fChannel.clear(); fNPhotoElectrons = 0; fCells.clear(); fCellTime.clear(); fPhysVol = nullptr; fDrawit = false; fPixelNumber = -1; fOCTflag.clear(); fDNflag.clear();}
-
-		inline void SetPixelPhysVol(G4VPhysicalVolume* physVol){this->fPhysVol = physVol;}
-		inline G4VPhysicalVolume* GetPixelPhysVol(){return fPhysVol;}
-
-		inline void SetPixelPhysVolMother(G4VPhysicalVolume* physVol){this->fPhysVolMother = physVol;}
-		inline G4VPhysicalVolume* GetPixelPhysVolMother(){return fPhysVolMother;}
-
-		inline void SetPixelPhysVolGMother(G4VPhysicalVolume* physVol){this->fPhysVolGMother = physVol;}
-		inline G4VPhysicalVolume* GetPixelPhysVolGMother(){return fPhysVolGMother;}
-
-		inline void SetDrawit(G4bool b){fDrawit=b;}
-		inline G4bool GetDrawit(){return fDrawit;}
-
-		inline void SetPixelNumber(G4int val){fPixelNumber = val;}
-		inline G4int GetPixelNumber(){return fPixelNumber;}
+		inline void Clear(){fChannel.clear(); fCells.clear(); fCellTime.clear(); fOCTflag.clear(); fDNflag.clear();}
 
 	private:
-		G4int fNCells;
 		std::vector<G4int> fChannel;
-		G4double fNPhotoElectrons;
 		std::vector<G4int> fCells;
 		std::vector<G4double> fCellTime;
 		std::vector<G4int> fOCTflag;
 		std::vector<G4int> fDNflag;
-		G4VPhysicalVolume* fPhysVol;
-		G4VPhysicalVolume* fPhysVolMother;
-		G4VPhysicalVolume* fPhysVolGMother;
-		G4bool fDrawit;
-		G4int fPixelNumber;
 };
 
 typedef G4THitsCollection<PixelHit> PixelHitsCollection;

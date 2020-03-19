@@ -50,8 +50,6 @@ class RunAction : public G4UserRunAction {
 		void SetCmdDN(G4bool cmd){fCmdDN = cmd;}
 		G4bool GetCmdDN(){return fCmdDN;}
 		
-		void SetNCells(G4int val){fNCells = val;}
-		void SetNPhotoElectrons(G4double val){fNPhotoElectrons = val;}
 		void SetCells(std::vector<G4int> val){fCells = val;}
 		void SetCellTime(std::vector<G4double> val){fCellTime = val;}
 		void SetOCTFlag(std::vector<G4int> val){fOCTflag = val;}
@@ -82,8 +80,6 @@ class RunAction : public G4UserRunAction {
 
 		G4bool fCmdOCT, fCmdDN;
 		// SiPM scorers
-		G4int fNCells;
-		G4double fNPhotoElectrons;
 		std::vector<G4int> fCells;
 		std::vector<G4double> fCellTime;
 		std::vector<G4int> fOCTflag;

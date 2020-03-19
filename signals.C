@@ -1,4 +1,4 @@
-void ordering(TString name){
+void ordering(TString name, TString file){
 	TFile* F = TFile::Open(name);
 	TTree* T = (TTree*) F->Get("T");
 
@@ -14,7 +14,7 @@ void ordering(TString name){
 	T->SetBranchAddress("Cells", &Cells);
 	T->SetBranchAddress("Channel", &Channel);
 	T->SetBranchAddress("CellTime", &CellTime);
-	T->SetBranchAddress("NCells", &NCells);
+
 	int eventsPerCycle = 100;
 	int Ni = (T->GetEntries() / eventsPerCycle);
 	if(T->GetEntries()%eventsPerCycle == 0) Ni -= 1;
@@ -23,7 +23,7 @@ void ordering(TString name){
 	vector<int> tempChannel;
 	vector<double> tempCellTime;
 
-	TFile* N = TFile::Open("output.root", "RECREATE");
+	TFile* N = TFile::Open(file + ".root", "RECREATE");
 	TTree* Tnew = new TTree("T", "output");
 	int sCells = 0, sChannel = 0;
 	double sCellTime = 0;
@@ -175,8 +175,8 @@ void ordering(TString name){
 	F->Close();
 }		
 
-void preprocessing(){
-	TFile* F = TFile::Open("./output.root");
+void preprocessing(TString file){
+	TFile* F = TFile::Open(file + ".root");
 	TTree* T = (TTree*) F->Get("T");
 
 	double activationTime[81][2668];
@@ -209,7 +209,7 @@ void preprocessing(){
 	}
 
 	F->Close();
-	TFile* N = TFile::Open("./output.root", "RECREATE");
+	TFile* N = TFile::Open(file + ".root", "RECREATE");
 	N->cd();
 	for(int i = 0; i < 81; i++){
 		Tnew.at(i)->Write(TString::Format("Ch%02d", i), TObject::kOverwrite);
@@ -222,8 +222,8 @@ double expo(double t, double offset){
 	else return 0;
 }
 
-void processing(double threashold){
-	TFile* F = TFile::Open("./output.root");
+void processing(double threashold, TString file){
+	TFile* F = TFile::Open(file + ".root");
 	TTree* T;
 	TTree* Twaves = new TTree();
 	
@@ -252,7 +252,7 @@ void processing(double threashold){
 	double totalTime = 0;
 
 	ofstream myfile;
-	myfile.open("out.txt");
+	myfile.open(file + ".txt");
 
 	for(int i = 0; i < 81; i++){
 		Nsignals = 0;
@@ -337,27 +337,34 @@ void processing(double threashold){
 
 
 void signals(){
-	ordering("data.root");
-	preprocessing();
-	processing(10);
+	ordering("data.root", "out");
+	preprocessing("out");
+	processing(10, "out");
 }
 
 void signals(double threashold){
-	ordering("data.root");
-	preprocessing();
-	processing(threashold);
+	ordering("data.root", "out");
+	preprocessing("out");
+	processing(threashold, "out");
 }
 
 void signals(TString name){
-	ordering(name);
-	preprocessing();
-	processing(10);
+	ordering(name, "out");
+	preprocessing("out");
+	processing(10, "out");
 }
 
-void signals(TString name, double threashold){
-	ordering(name);
-	preprocessing();
-	processing(threashold);
+
+void signals(TString name, TString out){
+	ordering(name, out);
+	preprocessing(out);
+	processing(10, out);
+}
+
+void signals(TString name, double threashold, TString out){
+	ordering(name, out);
+	preprocessing(out);
+	processing(threashold, out);
 }
 
 
