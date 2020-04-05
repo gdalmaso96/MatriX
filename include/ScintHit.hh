@@ -44,13 +44,16 @@ class ScintHit : public G4VHit{
 		inline void SetNgammaSec(G4int ngammasec){fNgammaSec = ngammasec;}
 		inline G4int GetNgammaSec(){return fNgammaSec;}
 
+		inline void SetParticleID(G4int particleID){fParticleID = particleID;}
+		inline G4int GetParticleID(){return fParticleID;}
+
 
 		inline void Clear(){fEin = 0; fEdep = 0; fDelta = 0; fNgammaSec = 0;}
 		inline const G4VPhysicalVolume* GetPhysV(){return fPhysVol;}
 
 	private:
 		G4double fEin, fEdep, fDelta;
-		G4int fNgammaSec;
+		G4int fNgammaSec, fParticleID;
 		const G4VPhysicalVolume* fPhysVol;
 };
 
@@ -68,5 +71,3 @@ inline void ScintHit::operator delete(void* aHit){
 }
 
 #endif
-
-

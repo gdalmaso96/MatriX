@@ -356,7 +356,6 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
     // SiPM pixel
     G4Box* solidPixel = new G4Box("Pixel", 0.5*SiPM_sizeXY, 0.5*SiPM_sizeXY, 0.5*SiPM_sizeZ);
     G4LogicalVolume* logicPixel = new G4LogicalVolume(solidPixel, fSi, "PixelLV");
-    G4int i = 0, j = 0;
     fLogicPixel = logicPixel;
 
     G4ThreeVector pixel_pos = G4ThreeVector(0, 0, -0.5 * (fSiPM_windowZ));
@@ -383,7 +382,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
     fCrysVolume = new G4PVPlacement(0, crys_pos, logicCrys, "Crystal", logicElement, false, 0, fCheckOverlaps);
 
     //Place Element in World
-    for (i = 0; i < 81; i++){
+    for (int i = 0; i < 81; i++){
 	G4ThreeVector element_pos = G4ThreeVector(6*mm * (- 4 + i%9),
                                                   6*mm * (- 4 + i/9),
                                                   - (fSolidWorld->GetZHalfLength() - fSolidElement->GetZHalfLength()) + 4*mm);

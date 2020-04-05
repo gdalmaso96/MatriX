@@ -78,6 +78,7 @@ G4bool ScintSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 		if(aStep->IsFirstStepInVolume() && fEin == 0){
 			ein = preStep->GetKineticEnergy();
 			fEin = ein;
+			fParticleID = aStep->GetTrack()->GetDynamicParticle()->GetPDGcode();
 			return false;
 		}
 		
@@ -115,6 +116,7 @@ void ScintSD::EndOfEvent(G4HCofThisEvent*){
 	Hit->SetEdep(fEdep);
 	Hit->SetEdelta(fDelta);
 	Hit->SetNgammaSec(fNgammaSec);
+	Hit->SetParticleID(fParticleID);
 	fScintCollection->insert(Hit);
 	fEdep = 0;
 	fEin = 0;

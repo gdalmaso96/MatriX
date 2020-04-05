@@ -266,6 +266,11 @@ G4bool PixelSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 		G4double dimensionsy = - ((G4Box*) physVol->GetLogicalVolume()->GetSolid())->GetYHalfLength();
 		G4double dimensionsx = - ((G4Box*) physVol->GetLogicalVolume()->GetSolid())->GetXHalfLength();
 
+/*
+G4ThreeVector localPos = theTouchable->GetHistory()->GetTransform(1).Inverse().TransformPoint(worldPos);
+
+					G4ThreeVector momentumDir = theTouchable->GetHistory()->GetTransform(1).Inverse().TransformPoint(aStep->GetTrack()->GetMomentumDirection());
+*/
 		if(aStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary && 
 		   std::fabs(localpos1.z() + dimensions) < kCarTolerance){
 
@@ -300,6 +305,7 @@ G4bool PixelSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 							newTrack->push_back(OCT);
 							fOCTflagvec.push_back(1);
 						}
+						else fOCTflagvec.push_back(0);
 						fDNflagvec.push_back(1);
 						
 						action->AdvanceDNTime(fChannel);

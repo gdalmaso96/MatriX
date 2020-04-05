@@ -61,6 +61,7 @@ void EventAction::EndOfEventAction(const G4Event* event){
 			fRunAction->SetEdelta(scintHit->GetEdelta());
 			fRunAction->SetID(fEvID);
 			fRunAction->SetNgammaSec(scintHit->GetNgammaSec());
+			fRunAction->SetParticleID(scintHit->GetParticleID());
 			
 			fRunAction->SetChannel(pixelHit->GetChannel());
 			fRunAction->SetCells(pixelHit->GetCells());
@@ -79,6 +80,7 @@ void EventAction::EndOfEventAction(const G4Event* event){
 
       }
 */
+	if(fEvID%100 == 0) std::cout << "Event n.: " << fEvID << std::endl;
 	fRunAction->AdvanceGunTime();
 	fEvID = -1;
 }

@@ -32,10 +32,6 @@
 # To superimpose all of the events from a given run:
 /vis/scene/endOfEventAction accumulate
 #
-# Attach text to one edge of crystal
-/vis/scene/add/text 0 0 -1 mm  18 0 0 BC400
-/vis/scene/add/text 0 0 -2 mm  18 0 0 SiPM
-
 /vis/viewer/set/style surface
 /vis/viewer/set/hiddenMarker true
 # Filtering optical gamma

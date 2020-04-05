@@ -43,6 +43,7 @@ class RunAction : public G4UserRunAction {
 		void SetID(G4int val){fID = val;}
 		void SetChannel(std::vector<G4int> val){fChannel = val;}
 		void SetNgammaSec(int ngammasec){fNgammaSec = ngammasec;}
+		void SetParticleID(int particleID){fParticleID = particleID;}
 		
 		void SetCmdOCT(G4bool cmd){fCmdOCT = cmd;}
 		G4bool GetCmdOCT(){return fCmdOCT;}
@@ -76,7 +77,7 @@ class RunAction : public G4UserRunAction {
 		G4int fID;
 		std::vector<G4int> fChannel;
 
-		G4int fNgammaSec;
+		G4int fNgammaSec, fParticleID;
 
 		G4bool fCmdOCT, fCmdDN;
 		// SiPM scorers

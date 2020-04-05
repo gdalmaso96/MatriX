@@ -14,7 +14,7 @@
 #include "G4SystemOfUnits.hh"
 
 
-RunAction::RunAction() : G4UserRunAction(), fData(nullptr), fTree(nullptr), fCmdOCT(false), fCmdDN(false), fGunTime(0), fDNTime(0), fGunTimeMean(1/(1.9e9*CLHEP::hertz)), fDNTimeMean(1/(90*CLHEP::kilohertz)), fName("./data.root"){
+RunAction::RunAction() : G4UserRunAction(), fData(nullptr), fTree(nullptr), fParticleID(0), fCmdOCT(false), fCmdDN(false), fGunTime(0), fDNTime(0), fGunTimeMean(1/(1.9e9*CLHEP::hertz)), fDNTimeMean(1/(90*CLHEP::kilohertz)), fName("./data.root"){
 	fMessenger = new RunActionMessenger(this);
 }
 
@@ -39,6 +39,7 @@ void RunAction::BeginOfRunAction(const G4Run*){
 	fTree->Branch("delta", &fDelta);
 	fTree->Branch("eventID", &fID);
 	fTree->Branch("NgammaSec", &fNgammaSec);
+	fTree->Branch("ParticleID", &fParticleID);
 
 	fTree->Branch("Channel", &fChannel);
 	fTree->Branch("Cells", &fCells);
@@ -52,7 +53,7 @@ void RunAction::BeginOfRunAction(const G4Run*){
 void RunAction::EndOfRunAction(const G4Run*){
 	fData->cd();
 	//fTree->Print();
-	fTree->Write();
+	fTree->Write("T", TObject::kOverwrite);
 	fData->Close();
 }
 
