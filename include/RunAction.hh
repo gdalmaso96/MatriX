@@ -40,10 +40,14 @@ class RunAction : public G4UserRunAction {
 		void SetEin (G4double val){fEin  = val;}
 		void SetEdep(G4double val){fEdep = val;}
 		void SetEdelta(G4double val){fDelta = val;}
+		void SetThetaIn(G4double val){fThetaIn = val;}
+		void SetTrackLength(G4double val){fTrackLength = val;}
+		void SetSurfaceIn(G4int val){fSurf = val;}
+		void SetPrimaryChannel(G4int val){fPrimaryChannel = val;}
 		void SetID(G4int val){fID = val;}
 		void SetChannel(std::vector<G4int> val){fChannel = val;}
-		void SetNgammaSec(int ngammasec){fNgammaSec = ngammasec;}
-		void SetParticleID(int particleID){fParticleID = particleID;}
+		void SetNgammaSec(G4int ngammasec){fNgammaSec = ngammasec;}
+		void SetParticleID(G4int particleID){fParticleID = particleID;}
 		
 		void SetCmdOCT(G4bool cmd){fCmdOCT = cmd;}
 		G4bool GetCmdOCT(){return fCmdOCT;}
@@ -74,6 +78,10 @@ class RunAction : public G4UserRunAction {
 		G4double fEin;
 		G4double fEdep;
 		G4double fDelta;
+		G4double fThetaIn;
+		G4double fTrackLength;
+		G4int fSurf;
+		G4int fPrimaryChannel;
 		G4int fID;
 		std::vector<G4int> fChannel;
 

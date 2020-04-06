@@ -18,6 +18,10 @@ class EventAction : public G4UserEventAction{
 		virtual void BeginOfEventAction(const G4Event*);
 		virtual void   EndOfEventAction(const G4Event*);
 
+		inline void SetThetaIn(G4double val){fThetaIn = val;}
+		inline void SetSurfaceIn(G4int val){fSurf = val;}
+		inline void SetPrimaryChannel(G4int val){fPrimaryChannel = val;}
+
 	private:
 		RunAction* fRunAction;
 		
@@ -26,6 +30,9 @@ class EventAction : public G4UserEventAction{
 		G4int fCollIDSiPMDraw;
 		
 		G4int fEvID; // to register each event just once
+
+		G4double fThetaIn;
+		G4int fSurf, fPrimaryChannel;
 
 		TTree* fTree;
 };

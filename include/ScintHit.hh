@@ -36,10 +36,18 @@ class ScintHit : public G4VHit{
 		inline void SetEin (G4double val){fEin  = val;}
 		inline void SetEdep(G4double val){fEdep = val;}
 		inline void SetEdelta(G4double val){fDelta = val;}
+		inline void SetThetaIn(G4double val){fThetaIn = val;}
+		inline void SetTrackLength(G4double val){fTrackLength = val;}
+		inline void SetSurfaceIn(G4int val){fSurfaceIn = val;}
+		inline void SetPrimaryChannel(G4int val){fPrimaryChannel = val;}
 		
 		inline G4double GetEin (){return fEin;}
 		inline G4double GetEdep(){return fEdep;}
 		inline G4double GetEdelta(){return fDelta;}
+		inline G4double GetThetaIn(){return fThetaIn;}
+		inline G4double GetTrackLength(){return fTrackLength;}
+		inline G4int GetSurfaceIn(){return fSurfaceIn;}
+		inline G4int GetPrimaryChannel(){return fPrimaryChannel;}
 
 		inline void SetNgammaSec(G4int ngammasec){fNgammaSec = ngammasec;}
 		inline G4int GetNgammaSec(){return fNgammaSec;}
@@ -48,12 +56,12 @@ class ScintHit : public G4VHit{
 		inline G4int GetParticleID(){return fParticleID;}
 
 
-		inline void Clear(){fEin = 0; fEdep = 0; fDelta = 0; fNgammaSec = 0;}
+		inline void Clear(){fEin = 0; fEdep = 0; fDelta = 0; fThetaIn = 0; fTrackLength = 0; fSurfaceIn = 0; fPrimaryChannel = 0; fNgammaSec = 0; fParticleID = 0;}
 		inline const G4VPhysicalVolume* GetPhysV(){return fPhysVol;}
 
 	private:
-		G4double fEin, fEdep, fDelta;
-		G4int fNgammaSec, fParticleID;
+		G4double fEin, fEdep, fDelta, fThetaIn, fTrackLength;
+		G4int fSurfaceIn, fPrimaryChannel, fNgammaSec, fParticleID;
 		const G4VPhysicalVolume* fPhysVol;
 };
 

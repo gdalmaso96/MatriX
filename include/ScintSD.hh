@@ -30,8 +30,8 @@ class ScintSD : public G4VSensitiveDetector{
 		
 	private:
 		ScintHitsCollection* fScintCollection;
-		G4double fEin, fEdep, fDelta;
-		G4int fNgammaSec, fParticleID;
+		G4double fEin, fEdep, fDelta, fThetaIn, fTrackLength;
+		G4int fSurfaceIn, fPrimaryChannel, fNgammaSec, fParticleID;
 		G4int fSiPM;
 };
 

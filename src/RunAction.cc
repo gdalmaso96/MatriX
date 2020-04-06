@@ -37,6 +37,10 @@ void RunAction::BeginOfRunAction(const G4Run*){
 	fTree->Branch( "ein",  &fEin);
 	fTree->Branch("edep", &fEdep);
 	fTree->Branch("delta", &fDelta);
+	fTree->Branch("ThetaIn", &fThetaIn);
+	fTree->Branch("TrackLength", &fTrackLength);
+	fTree->Branch("SurfIn", &fSurf);
+	fTree->Branch("PrimaryChannel", &fPrimaryChannel);
 	fTree->Branch("eventID", &fID);
 	fTree->Branch("NgammaSec", &fNgammaSec);
 	fTree->Branch("ParticleID", &fParticleID);

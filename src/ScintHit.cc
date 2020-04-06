@@ -8,7 +8,7 @@
 
 G4ThreadLocal G4Allocator<ScintHit>* ScintHitAllocator = nullptr;
 
-ScintHit::ScintHit() : fEin(0.), fEdep(0.), fDelta(0), fNgammaSec(0), fParticleID(0), fPhysVol(nullptr){}
+ScintHit::ScintHit() : fEin(0.), fEdep(0.), fDelta(0), fThetaIn(0), fTrackLength(0), fSurfaceIn(0), fPrimaryChannel(0), fNgammaSec(0), fParticleID(0), fPhysVol(nullptr){}
 
 ScintHit::ScintHit(G4VPhysicalVolume* pVol) : fPhysVol(pVol){}
 
@@ -18,6 +18,10 @@ ScintHit::ScintHit(const ScintHit &right) : G4VHit(){
 	fEin  = right.fEin;
 	fEdep = right.fEdep;
 	fDelta = right.fDelta;
+	fThetaIn = right.fThetaIn;
+	fTrackLength = right.fTrackLength;
+	fSurfaceIn = right.fSurfaceIn;
+	fPrimaryChannel = right.fPrimaryChannel;
 	fNgammaSec = right.fNgammaSec;
 	fParticleID = right.fParticleID;
 	fPhysVol = right.fPhysVol;
@@ -27,6 +31,10 @@ const ScintHit& ScintHit::operator=(const ScintHit &right){
 	fEin  = right.fEin;
 	fEdep = right.fEdep;
 	fDelta = right.fDelta;
+	fThetaIn = right.fThetaIn;
+	fTrackLength = right.fTrackLength;
+	fSurfaceIn = right.fSurfaceIn;
+	fPrimaryChannel = right.fPrimaryChannel;
 	fNgammaSec = right.fNgammaSec;
 	fParticleID = right.fParticleID;
 	fPhysVol = right.fPhysVol;

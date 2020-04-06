@@ -4,6 +4,7 @@
 #include "TTree.h"
 
 #include "RunAction.hh"
+#include "DetectorConstruction.hh"
 #include "EventAction.hh"
 #include "ScintHit.hh"
 #include "PixelHit.hh"
@@ -59,6 +60,10 @@ void EventAction::EndOfEventAction(const G4Event* event){
 			fRunAction->SetEin(scintHit->GetEin());
 			fRunAction->SetEdep(scintHit->GetEdep());
 			fRunAction->SetEdelta(scintHit->GetEdelta());
+			fRunAction->SetThetaIn(scintHit->GetThetaIn());
+			fRunAction->SetTrackLength(scintHit->GetTrackLength());
+			fRunAction->SetSurfaceIn(scintHit->GetSurfaceIn());
+			fRunAction->SetPrimaryChannel(scintHit->GetPrimaryChannel());
 			fRunAction->SetID(fEvID);
 			fRunAction->SetNgammaSec(scintHit->GetNgammaSec());
 			fRunAction->SetParticleID(scintHit->GetParticleID());

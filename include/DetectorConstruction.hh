@@ -68,6 +68,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction{
 	
 	G4double fCrysSizeX, fCrysSizeY, fCrysSizeZ;
 	G4double fSiPM_sizeXY, fSiPM_sizeZ, fSiPM_windowZ;
+
 	// Materials & Elements
 	G4Material* fBC400;
 	G4Material* fLYSO;

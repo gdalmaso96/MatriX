@@ -22,7 +22,7 @@
 
 #include "TVector3.h"
 
-ScintSD::ScintSD(G4String name) : G4VSensitiveDetector(name), fEin(0), fEdep(0), fDelta(0), fNgammaSec(0){
+ScintSD::ScintSD(G4String name) : G4VSensitiveDetector(name), fEin(0), fEdep(0), fDelta(0), fThetaIn(0), fTrackLength(0), fSurfaceIn(0), fPrimaryChannel(0), fNgammaSec(0){
 	fScintCollection = nullptr;
 	collectionName.insert("scintCollection");
 }
@@ -56,7 +56,8 @@ G4bool ScintSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 
 		fEdep += edep;
 		fDelta -= delta;
-		
+		fTrackLength += aStep->GetStepLength();
+
 		G4double ein = 0, eout = 0;
 		G4StepPoint* preStep = aStep->GetPreStepPoint();
 		G4StepPoint* postStep = aStep->GetPostStepPoint();
@@ -75,10 +76,62 @@ G4bool ScintSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 		}
 
 		// Saving e+ characteristics				
-		if(aStep->IsFirstStepInVolume() && fEin == 0){
+		if(preStep->GetStepStatus() == fGeomBoundary && fEin == 0){
 			ein = preStep->GetKineticEnergy();
 			fEin = ein;
 			fParticleID = aStep->GetTrack()->GetDynamicParticle()->GetPDGcode();
+
+			G4double kCarTolerance = G4GeometryTolerance::GetInstance()->GetSurfaceTolerance();
+			G4double dimensionx = ((G4Box*) thePreTouchable->GetVolume(0)->GetLogicalVolume()->GetSolid())->GetXHalfLength();
+			G4double dimensiony = ((G4Box*) thePreTouchable->GetVolume(0)->GetLogicalVolume()->GetSolid())->GetYHalfLength();
+			G4double dimensionz = ((G4Box*) thePreTouchable->GetVolume(0)->GetLogicalVolume()->GetSolid())->GetZHalfLength();
+			G4ThreeVector worldPos = aStep->GetPreStepPoint()->GetPosition();
+			G4ThreeVector localPos = thePreTouchable->GetHistory()->GetTopTransform().TransformPoint(worldPos);
+			G4AffineTransform momentumTransform = thePreTouchable->GetHistory()->GetTopTransform();
+			momentumTransform.SetNetTranslation(G4ThreeVector(0,0,0));
+			G4ThreeVector momentumDir = momentumTransform.TransformPoint(aStep->GetPreStepPoint()->GetMomentumDirection());
+
+
+			/// Surfaces:
+			///          - x>0: DS right. Surf = 0
+			///          - x<0: DS left.  Surf = 1
+			///          - y>0: DS up.    Surf = 2
+			///          - y<0: DS down.  Surf = 3
+			///          - z>0: DS front. Surf = 4
+			///          - z<0: DS back.  Surf = 5
+			if(std::fabs(localPos.x() - dimensionx) < kCarTolerance &&
+			   momentumDir.x() < 0){
+				fThetaIn = acos(-momentumDir.x());
+				fSurfaceIn = 0;
+			}
+			else if(std::fabs(localPos.x() + dimensionx) < kCarTolerance &&
+			   momentumDir.x() > 0){
+				fThetaIn = acos(momentumDir.x());
+				fSurfaceIn = 1;
+			}
+			else if(std::fabs(localPos.y() - dimensiony) < kCarTolerance &&
+			   momentumDir.y() < 0){
+				fThetaIn = acos(-momentumDir.y());
+				fSurfaceIn = 2;
+			}
+			else if(std::fabs(localPos.y() + dimensiony) < kCarTolerance &&
+			   momentumDir.y() > 0){
+				fThetaIn = acos(momentumDir.y());
+				fSurfaceIn = 3;
+			}
+			else if(std::fabs(localPos.z() - dimensionz) < kCarTolerance &&
+			   momentumDir.z() < 0){
+				fThetaIn = acos(-momentumDir.z());
+				fSurfaceIn = 4;
+			}
+			else if(std::fabs(localPos.z() + dimensionz) < kCarTolerance &&
+			   momentumDir.z() > 0){
+				fThetaIn = acos(momentumDir.z());
+				fSurfaceIn = 5;
+			}
+			fPrimaryChannel = thePreTouchable->GetReplicaNumber(1);
+
+
 			return false;
 		}
 		
@@ -115,12 +168,17 @@ void ScintSD::EndOfEvent(G4HCofThisEvent*){
 	Hit->SetEin(fEin);
 	Hit->SetEdep(fEdep);
 	Hit->SetEdelta(fDelta);
+	Hit->SetThetaIn(fThetaIn);
+	Hit->SetTrackLength(fTrackLength);
+	Hit->SetSurfaceIn(fSurfaceIn);
+	Hit->SetPrimaryChannel(fPrimaryChannel);
 	Hit->SetNgammaSec(fNgammaSec);
 	Hit->SetParticleID(fParticleID);
 	fScintCollection->insert(Hit);
 	fEdep = 0;
 	fEin = 0;
 	fDelta = 0;
+	fTrackLength = 0;
 	fNgammaSec = 0;
 }
 
