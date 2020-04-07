@@ -137,11 +137,11 @@ G4bool ScintSD::ProcessHits(G4Step *aStep, G4TouchableHistory*){
 		
 		eout = postStep->GetKineticEnergy();
 		if(postStep->GetStepStatus() == fGeomBoundary){
-			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+//			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			return true;
 		}
 		else if (eout == 0.){
-			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+//			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			return true;
 		}
 		

@@ -66,7 +66,7 @@ void DetectorConstruction::DefineMaterials(){
 	G4NistManager* nist = G4NistManager::Instance();
 	G4double a; // atomic mass
 	G4double z; // atomic number
-	G4double R = 1.103; // hydrogen to carbon ratio in BC400
+//	G4double R = 1.103; // hydrogen to carbon ratio in BC400
 	G4double density;
 	
 	/// Elements
@@ -121,10 +121,8 @@ void DetectorConstruction::DefineMaterials(){
 				 0.1 * kelvin, 1.e-19 * pascal);
 	
 	// Absorber
-	fAbsorber = new G4Material("Absorber",z=1.,a=1.01*g/mole, 
-		     		 density = universe_mean_density, kStateGas,
-				 0.1 * kelvin, 1.e-19 * pascal);
-	
+	fAbsorber = nist->FindOrBuildMaterial("G4_POLYETHYLENE");
+
 	/// Material properties tables
 	//  BC400 optics
 	std::vector<G4double> energy, scint;
@@ -143,11 +141,11 @@ void DetectorConstruction::DefineMaterials(){
 	assert(energy.size() == scint.size());
 	const G4int bc400 = int(energy.size());
 
-	G4double BC400_Energy[bc400];
-	G4double BC400_SCINT[bc400];
+	G4double* BC400_Energy = new G4double[bc400];
+	G4double* BC400_SCINT  = new G4double[bc400];
 
-	G4double BC400_RIND[bc400];
-	G4double BC400_ABSL[bc400];
+	G4double* BC400_RIND = new G4double[bc400];
+	G4double* BC400_ABSL = new G4double[bc400];
 	
 	for(int i = 0; i < bc400; i++){
 		BC400_Energy[i] = energy.at(i)*eV;
@@ -199,11 +197,11 @@ void DetectorConstruction::DefineMaterials(){
 	assert(energy.size() == scint.size());
 	const G4int lyso = int(energy.size());
 
-	G4double LYSO_Energy[lyso];
-	G4double LYSO_SCINT[lyso];
+	G4double* LYSO_Energy = new G4double[lyso];
+	G4double* LYSO_SCINT = new G4double[lyso];
 
-	G4double LYSO_RIND[lyso];
-	G4double LYSO_ABSL[lyso];
+	G4double* LYSO_RIND = new G4double[lyso];
+	G4double* LYSO_ABSL = new G4double[lyso];
 	
 	for(int i = 0; i < lyso; i++){
 		LYSO_Energy[i] = energy.at(i)*eV;
@@ -318,7 +316,6 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
 
 
     //SiPM parameters
-    G4int nofPixels = fNbOfPixelsX * fNbOfPixelsY; 
     G4double SiPM_sizeXY = fSiPM_sizeXY;
     G4double SiPM_sizeZ = fSiPM_sizeZ;
 
@@ -337,7 +334,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
     // Board = Cylinder
     G4Tubs* SolidBoard = new G4Tubs("Board", 0, 6*cm, 2*mm, 0, 2*CLHEP::pi);
     G4LogicalVolume* logicBoard = new G4LogicalVolume(SolidBoard, fBoard, "Board");
-    G4PVPlacement* physBoard = new G4PVPlacement(0, G4ThreeVector(0,0, - 0.5 * (world_sizeZ - 4*mm)), logicBoard, "Board", logicWorld, false, 0, fCheckOverlaps);
+    new G4PVPlacement(0, G4ThreeVector(0,0, - 0.5 * (world_sizeZ - 4*mm)), logicBoard, "Board", logicWorld, false, 0, fCheckOverlaps);
 
 
     // Scintillator
@@ -393,7 +390,7 @@ G4VPhysicalVolume* DetectorConstruction::DefineVolumes(){
 
     G4LogicalVolume* logicMask = new G4LogicalVolume(SolidMask, fAbsorber, "Mask");
     if(fMaskBool){
-	    G4PVPlacement* physMask = new G4PVPlacement(0, G4ThreeVector(0,0, - 0.5 * (world_sizeZ - 8*mm -(fCrysSizeZ + SiPM_sizeZ + fSiPM_windowZ))), logicMask, "Mask", logicWorld, false, 0, fCheckOverlaps);
+	    new G4PVPlacement(0, G4ThreeVector(0,0, - 0.5 * (world_sizeZ - 8*mm -(fCrysSizeZ + SiPM_sizeZ + fSiPM_windowZ))), logicMask, "Mask", logicWorld, false, 0, fCheckOverlaps);
     }
 
     logicBoard->SetVisAttributes(G4Colour(0., 1, 0., 0.8));
