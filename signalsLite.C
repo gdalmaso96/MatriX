@@ -250,7 +250,6 @@ void processing(double threashold, TString file){
 
 	TGraph G;
 	
-	Twaves->Branch("Signal", &G);
 	Twaves->Branch("Channel", &Channel);
 	Twaves->Branch("Amplitude", &Amplitude);
 	Twaves->Branch("Charge", &Charge);
@@ -442,7 +441,7 @@ void signals(){
 void signals(double threashold){
 	ordering("data.root", "out");
 	preprocessing("out");
-	processing(threashold, "out");
+	processing(0.5, "out");
 	reprocess(threashold, "out");
 }
 
@@ -450,7 +449,7 @@ void signals(TString name){
 	ordering(name, "out");
 	preprocessing("out");
 	processing(0.5, "out");
-	reprocess(0.5, "out");
+	reprocess(10, "out");
 }
 
 
@@ -464,7 +463,7 @@ void signals(TString name, TString out){
 void signals(TString name, double threashold, TString out){
 	ordering(name, out);
 	preprocessing(out);
-	processing(threashold, out);
+	processing(0.5, out);
 	reprocess(threashold, out);
 }
 

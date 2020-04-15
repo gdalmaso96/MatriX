@@ -523,8 +523,8 @@ int readMatrix(string filename) {
 
 //    Float_t Ntot = 2 * TMath::Pi() * fit->Eval(theFit->GetParameter(1), theFit->GetParameter(3)) * theFit->GetParameter(2) * theFit->GetParameter(4) * TMath::Sqrt(1 - theFit->GetParameter(5) * theFit->GetParameter(5)) / (crystalSize * crystalSize);
     Float_t Ntot = theFit->GetParameter(0) / (crystalSize * crystalSize);
-    Float_t muonRate = Ntot * 0.22 / beamRate / time * 1e9;
-    Float_t dMuonRate = theFit->GetParError(0) * 0.22 / beamRate / time * 1e9;
+    Float_t muonRate = Ntot * 0.22 / beamRate / time;
+    Float_t dMuonRate = theFit->GetParError(0) * 0.22 / beamRate / time;
 
 	std::cout << muonRate << " " << dMuonRate << std::endl;
 
@@ -630,8 +630,8 @@ int readMatrix(string filename, double *R) {
 
 //    Float_t Ntot = 2 * TMath::Pi() * fit->Eval(theFit->GetParameter(1), theFit->GetParameter(3)) * theFit->GetParameter(2) * theFit->GetParameter(4) * TMath::Sqrt(1 - theFit->GetParameter(5) * theFit->GetParameter(5)) / (crystalSize * crystalSize);
     Float_t Ntot = theFit->GetParameter(0) / (crystalSize * crystalSize);
-    Float_t muonRate = Ntot * 0.22 / beamRate / time * 1e9;
-    Float_t dMuonRate = theFit->GetParError(0) * 0.22 / beamRate / time * 1e9;
+    Float_t muonRate = Ntot * 0.22 / beamRate / time;
+    Float_t dMuonRate = theFit->GetParError(0) * 0.22 / beamRate / time;
 
 	std::cout << muonRate << " " << dMuonRate << std::endl;
 
