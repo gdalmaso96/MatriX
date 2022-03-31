@@ -3,31 +3,31 @@ Matrix simulation
 
 # Commands
 Datas are saved into the build folder in the "data.root" file. You can change file name with:
-	/Analysis/SetFileName <new_name.root> (must include ".root")
+<code> /Analysis/SetFileName <new_name.root> (must include ".root") </code>
 
 It is possible to change the scintillation crystals material and size:
-	/MatriX/det/CrysSize <newsize> <unit>
-	/MatriX/det/CrysSize3 <newsizex> <newsizey> <newsizez> <unit>
-	/MatriX/det/CrysMaterial <material_name> ("BC400" or "LYSO")
+<code> /MatriX/det/CrysSize <newsize> <unit> </code>
+<code> /MatriX/det/CrysSize3 <newsizex> <newsizey> <newsizez> <unit> </code>
+<code> /MatriX/det/CrysMaterial <material_name> ("BC400" or "LYSO") </code>
 
 It is possible to change the SiPM model:
-	/MatriX/det/SiPMmodel <model_name> ("25PE", "50PE", "75PE", "25CS", "50CS", "75CS")
+<code> /MatriX/det/SiPMmodel <model_name> ("25PE", "50PE", "75PE", "25CS", "50CS", "75CS") </code>
 
 It is possible to put a mask on MatriX to isolate the elements:
-	/MatriX/det/Mask <bool> (default is "false")
+<code> /MatriX/det/Mask <bool> (default is "false") </code>
 
 It is possible to activate dark counts or optical cross talk:
-	/Element/det/OCT <bool> (default is false)
-	/Element/det/DN <bool>  (default is false)
+<code> /Element/det/OCT <bool> (default is false) </code>
+<code> /Element/det/DN <bool>  (default is false) </code>
 
 It is possible to change beam rate, particle or energy:
-	/Primaries/Rate <value> <unit>
-	/gun/particle <particle>
-	/gun/energy <energy> <unit> (momentum as well)
+<code> /Primaries/Rate <value> <unit> </code>
+<code> /gun/particle <particle> </code>
+<code> /gun/energy <energy> <unit> (momentum as well) </code>
 
 # Output signals
 
-ee the signals you must use signals.C macro:
+To see the signals you must use signals.C macro:
 <code> bash>> root </code>
 <code> root-bash>> .L signals.C </code>
 
