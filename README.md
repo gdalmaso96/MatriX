@@ -26,14 +26,26 @@ It is possible to change beam rate, particle or energy:
 	/gun/energy <energy> <unit> (momentum as well)
 
 # Output signals
-To see the signals you must use signals.C macro:
-	bash>> root
-	root-bash>> .L signals.C
-	root-bash>> signals() or signals(path-to-file) or signals(path-to-file, path-to-output-file<no file extension>) or signals(path-to-file, threashold, path-to-output-file<no file extension>) (threashold is in number of pixel activated per channel)
+
+ee the signals you must use signals.C macro:
+<code> bash>> root </code>
+<code> root-bash>> .L signals.C </code>
+
+<code> root-bash>> signals() </code>
+
+or
+
+<code> signals(path-to-file) </code>
+
+or
+
+<code> signals(path-to-file, path-to-output-file<no file extension>) </code>
+
+or
+
+<code> signals(path-to-file, threashold, path-to-output-file<no file extension>)</code> (threashold is in number of pixel activated per channel)
 
 These commands will produce a out.txt file. Here you have the number of signals per channel, the proton current (always at max 0.22) and the run duration. To extract beam information from datas you can use readgio.cpp macro:
-	bash>> root
-	root-bash>> .L readgio.cpp
-	root-bash>> readMatrix("out.txt") (it requires a "fig" directory to exist in the build folder)
-
-
+<code> bash>> root </code>
+<code> root-bash>> .L readgio.cpp </code>
+<code> root-bash>> readMatrix("out.txt") </code> (it requires a "fig" directory to exist in the build folder)
